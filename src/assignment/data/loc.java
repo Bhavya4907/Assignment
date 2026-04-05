@@ -1,9 +1,9 @@
-package com.cms.data;
+package assignment.data;
 
-import com.cms.model.*;
-import com.cms.ui.*;
-import com.cms.data.*;
-import com.cms.service.*;
+import assignment.data.*;
+import assignment.model.*;
+import assignment.ui.*;
+import assignment.service.*;
 
 import java.util.ArrayList;
 

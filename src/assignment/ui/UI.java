@@ -1,0 +1,50 @@
+package assignment.ui;
+
+import javax.swing.*;
+
+public class UI {
+
+    public static void main(String[] args) {
+
+        JFrame jframe = new JFrame("Login As:");
+
+        JButton student = new JButton("Student");
+        JButton admin = new JButton("Administrator");
+        JButton professor = new JButton("Professor");
+
+        student.setBounds(100, 80, 150, 40);
+        admin.setBounds(100, 140, 150, 40);
+        professor.setBounds(100, 200, 150, 40);
+
+        jframe.add(student);
+        jframe.add(admin);
+        jframe.add(professor);
+
+        jframe.setSize(400, 400);
+        jframe.setLayout(null);
+        jframe.setLocationRelativeTo(null);
+        jframe.setVisible(true);
+
+        student.addActionListener(e -> {
+            new LoginUI();
+            jframe.dispose();
+        });
+
+        admin.addActionListener(e -> {
+
+            String pass = JOptionPane.showInputDialog("Enter Admin Password:");
+
+            if ("admin123".equals(pass)) {
+                new AdminUI();
+                jframe.dispose();
+            } else {
+                JOptionPane.showMessageDialog(jframe, "Wrong Password!");
+            }
+        });
+
+        professor.addActionListener(e -> {
+            new ProfessorLoginUI();
+            jframe.dispose();
+        });
+    }
+}

@@ -1,9 +1,8 @@
-package com.cms.model;
-
-import com.cms.model.*;
-import com.cms.ui.*;
-import com.cms.data.*;
-import com.cms.service.*;
+package assignment.model;
+import assignment.data.*;
+import assignment.model.*;
+import assignment.ui.*;
+import assignment.service.*;
 
 public class Admin {
     String Name;
