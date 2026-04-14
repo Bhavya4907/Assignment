@@ -11,7 +11,7 @@ public class LoginUI extends JFrame {
 
     JTextField emailField;
     JPasswordField passwordField;
-    JButton login, signup, adminLogin , professorLogin;
+    JButton login, signup;
 
     public LoginUI() {
 
@@ -27,7 +27,6 @@ public class LoginUI extends JFrame {
 
         login = new JButton("Login");
         signup = new JButton("Sign Up");
-        adminLogin = new JButton("Admin Login");
 
         add(emailLabel);
         add(emailField);
@@ -35,7 +34,6 @@ public class LoginUI extends JFrame {
         add(passwordField);
         add(login);
         add(signup);
-        add(adminLogin);
 
         setLocationRelativeTo(null);
         setVisible(true);
@@ -69,28 +67,6 @@ public class LoginUI extends JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Error!");
             }
-        });
-
-
-        adminLogin.addActionListener(e -> {
-
-            String pass = JOptionPane.showInputDialog("Enter Admin Password:");
-
-            if ("admin123".equals(pass)) {
-                new AdminUI();
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Wrong Password!");
-            }
-        });
-
-        professorLogin.addActionListener(e -> {
-
-            String name = JOptionPane.showInputDialog("Enter Professor Name:");
-
-            Professor professor = new Professor(name);
-            new ProfessorUI(professor);
-            dispose();
         });
     }
 }

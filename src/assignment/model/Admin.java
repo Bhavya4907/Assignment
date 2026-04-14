@@ -1,14 +1,12 @@
 package assignment.model;
-import assignment.data.*;
-import assignment.model.*;
-import assignment.ui.*;
-import assignment.service.*;
 
 public class Admin {
-    String Name;
+    public String name;
+    public String email;
+    public int dbId;
 
-    public Admin(String Name) //public constructor may help in packages
-    {
-        this.Name = Name;
+    public Admin(String name, String email) {
+        this.name  = name;
+        this.email = email;
     }
 }

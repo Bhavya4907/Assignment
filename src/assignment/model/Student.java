@@ -6,59 +6,57 @@ import java.util.*;
 
 public class Student {
 
-    public int currentSemester = 1;
+    // --- Identity ---
+    public String name;
+    public String id;       // string id for display
+    public int dbId;        // integer primary key from users table
     public String branch;
+    public String email;
 
-    public List<String> completed = new ArrayList<>();
+    // --- Semester tracking ---
+    public int currentSemester = 1;
+
+    // --- Course tracking ---
+    public List<String> completed  = new ArrayList<>();
     public List<String> registered = new ArrayList<>();
 
+    // --- Complaints ---
     public List<Complaint> complaints = new ArrayList<>();
 
-
+    // --- Grades: courseCode -> grade string ---
     public Map<String, String> grades = new HashMap<>();
 
+    // --- Credit tracking ---
     public int currCred = 0;
     public static final int MAX_CREDITS = 20;
 
-    public Student(String branch) {
+    // --- Per-semester GPA history for CGPA ---
+    public Map<Integer, Double> semesterSGPA = new LinkedHashMap<>();
+
+    public Student(String name, String id, String branch) {
+        this.name   = name;
+        this.id     = id;
         this.branch = branch;
     }
 
-
     public boolean registerCourse(Course course) {
+        if (course.getSemester() != currentSemester) return false;
+        if (registered.contains(course.getCode())) return false;
+        if (currCred + course.getCredit() > MAX_CREDITS) return false;
 
-        if (course.getSemester() != currentSemester) {
-            System.out.println("Only current semester allowed!");
-            return false;
-        }
-
-        if (currCred + course.getCredit() > MAX_CREDITS) {
-            System.out.println("Credit limit exceeded!");
-            return false;
-        }
-
-        if (!completed.containsAll(course.getPrerequisites())) {
-            System.out.println("Prerequisites not met!");
-            return false;
-        }
-
-        if (registered.contains(course.getCode())) {
-            System.out.println("Already registered!");
-            return false;
-        }
+        List<String> prereqs = course.getPrerequisites();
+        if (prereqs != null && !completed.containsAll(prereqs)) return false;
 
         registered.add(course.getCode());
         currCred += course.getCredit();
-
         return true;
     }
 
-
-    public void dropCourse(Course course) {
-        if (registered.contains(course.getCode())) {
-            registered.remove(course.getCode());
-            currCred -= course.getCredit();
-        }
+    public boolean dropCourse(Course course) {
+        if (!registered.contains(course.getCode())) return false;
+        registered.remove(course.getCode());
+        currCred -= course.getCredit();
+        return true;
     }
 
     public void addComplaint(String description) {
@@ -67,55 +65,66 @@ public class Student {
         SystemData.allComplaints.add(complaint);
     }
 
-
     public void addGrade(String courseCode, String grade) {
         grades.put(courseCode, grade);
         completed.add(courseCode);
-        registered.remove(courseCode); // marks course as finished
+        registered.remove(courseCode);
     }
 
-
-    public boolean isSemesterComplete() {
-        return registered.isEmpty();
-    }
+    public boolean isSemesterComplete() { return registered.isEmpty(); }
 
     public void nextSemester() {
-        if (isSemesterComplete()) {
-            currentSemester++;
-            currCred = 0;
-        } else {
-            System.out.println("Semester not complete yet!");
-        }
+        if (!isSemesterComplete()) return;
+        semesterSGPA.put(currentSemester, calculateSGPA());
+        currentSemester++;
+        currCred = 0;
     }
 
+    public double calculateSGPA() {
+        int totalCredits = 0; double totalPoints = 0;
+        for (String code : grades.keySet()) {
+            Course c = SystemData.getCourseByCode(code);
+            if (c == null || c.getSemester() != currentSemester) continue;
+            totalCredits += c.getCredit();
+            totalPoints  += convertGrade(grades.get(code)) * c.getCredit();
+        }
+        return (totalCredits == 0) ? 0.0 : totalPoints / totalCredits;
+    }
 
-    public double calculateGPA() {
-        int totalCredits = 0;
-        double totalPoints = 0;
+    public double calculateCGPA() {
+        if (semesterSGPA.isEmpty()) return calculateOverallGPA();
+        double sum = 0;
+        for (double s : semesterSGPA.values()) sum += s;
+        return sum / semesterSGPA.size();
+    }
 
-        for (String courseCode : grades.keySet()) {
-
-            int credit = 4; // simplified assumption
-            double gradePoint = convertGrade(grades.get(courseCode));
-
+    public double calculateOverallGPA() {
+        int totalCredits = 0; double totalPoints = 0;
+        for (String code : grades.keySet()) {
+            Course c = SystemData.getCourseByCode(code);
+            int credit = (c != null) ? c.getCredit() : 4;
             totalCredits += credit;
-            totalPoints += gradePoint * credit;
+            totalPoints  += convertGrade(grades.get(code)) * credit;
         }
-
-        if (totalCredits == 0) return 0;
-
-        return totalPoints / totalCredits;
+        return (totalCredits == 0) ? 0.0 : totalPoints / totalCredits;
     }
-
 
     private double convertGrade(String grade) {
-        switch (grade) {
-            case "A": return 10;
-            case "B": return 8;
-            case "C": return 6;
-            case "D": return 4;
-            case "F": return 0;
-            default: return 0;
+        if (grade == null) return 0;
+        switch (grade.toUpperCase()) {
+            case "O": case "A+": return 10;
+            case "A":            return 9;
+            case "B+":           return 8;
+            case "B":            return 7;
+            case "C":            return 6;
+            case "D":            return 5;
+            case "F":            return 0;
+            default:             return 0;
         }
+    }
+
+    @Override
+    public String toString() {
+        return id + " - " + name + " | Branch: " + branch + " | Semester: " + currentSemester;
     }
 }

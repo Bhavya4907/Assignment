@@ -1,83 +1,109 @@
 package assignment.service;
 
-import assignment.data.*;
 import assignment.model.*;
-import assignment.ui.*;
-import assignment.service.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Upyogkarta {
 
     public Student validateStudent(String email, String password) {
-
-        try {
-            Connection connection = DBConnection.getConnection();
-
+        try (Connection con = DBConnection.getConnection()) {
             String query = "SELECT * FROM users WHERE email=? AND password=? AND role='student'";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-            preparedStatement.setString(1, email);
-            preparedStatement.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String name   = rs.getString("name") != null ? rs.getString("name") : email;
+                String id     = String.valueOf(rs.getInt("id"));
+                String branch = rs.getString("branch");
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+                Student student = new Student(name, id, branch);
+                student.dbId  = rs.getInt("id");
+                student.email = email;
 
-            if (resultSet.next()) {
-                return new Student(resultSet.getString("branch"));
+                Registration.restoreStudentRegistrations(student);
+                return student;
             }
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
         return null;
     }
 
     public boolean registerStudent(String email, String password, String branch) {
-        try {
-            Connection connection = DBConnection.getConnection();
-
+        try (Connection con = DBConnection.getConnection()) {
             String query = "INSERT INTO users(email, password, role, branch) VALUES (?, ?, 'student', ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-
-            preparedStatement.setString(1, email);
-            preparedStatement.setString(2, password);
-            preparedStatement.setString(3, branch);
-
-            preparedStatement.executeUpdate();
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, email);
+            ps.setString(2, password);
+            ps.setString(3, branch);
+            ps.executeUpdate();
             return true;
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
 
     public Professor validateProfessor(String email, String password) {
-
-        try {
-            Connection con = DBConnection.getConnection();
-
+        try (Connection con = DBConnection.getConnection()) {
             String query = "SELECT * FROM users WHERE email=? AND password=? AND role='professor'";
             PreparedStatement ps = con.prepareStatement(query);
-
             ps.setString(1, email);
             ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
-                return new Professor(rs.getString("email")); // using email as name
+                String name = rs.getString("name") != null ? rs.getString("name") : email;
+                Professor prof = new Professor(name, email);
+                prof.dbId = rs.getInt("id");
+                return prof;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
+
+    public boolean registerProfessor(String email, String password, String name) {
+        try (Connection con = DBConnection.getConnection()) {
+            String query = "INSERT INTO users(name, email, password, role) VALUES (?, ?, ?, 'professor')";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
+            ps.setString(2, email);
+            ps.setString(3, password);
+            ps.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void loadAllStudents() {
+        SystemData.students.clear();
+        try (Connection con = DBConnection.getConnection()) {
+            String query = "SELECT * FROM users WHERE role='student'";
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String name   = rs.getString("name") != null ? rs.getString("name") : rs.getString("email");
+                String id     = String.valueOf(rs.getInt("id"));
+                String branch = rs.getString("branch");
+                String email  = rs.getString("email");
+
+                Student s = new Student(name, id, branch);
+                s.dbId  = rs.getInt("id");
+                s.email = email;
+
+                Registration.restoreStudentRegistrations(s);
+                SystemData.students.add(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
-
-

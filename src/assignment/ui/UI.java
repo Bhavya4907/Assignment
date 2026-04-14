@@ -27,8 +27,8 @@ public class UI {
 
         student.addActionListener(e -> {
             new LoginUI();
-            jframe.dispose();
         });
+
 
         admin.addActionListener(e -> {
 
@@ -36,7 +36,6 @@ public class UI {
 
             if ("admin123".equals(pass)) {
                 new AdminUI();
-                jframe.dispose();
             } else {
                 JOptionPane.showMessageDialog(jframe, "Wrong Password!");
             }
@@ -44,7 +43,6 @@ public class UI {
 
         professor.addActionListener(e -> {
             new ProfessorLoginUI();
-            jframe.dispose();
         });
     }
 }

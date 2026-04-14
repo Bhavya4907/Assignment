@@ -1,37 +1,29 @@
 package assignment.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class Complaint {
 
     private String description;
     private String status;
-    private LocalDateTime date; // for tem
+    private String resolution;
+    private LocalDate date;
 
     public Complaint(String description) {
         this.description = description;
-        this.status = "Pending";
-        this.date = LocalDateTime.now();
+        this.status      = "Pending";
+        this.date        = LocalDate.now();
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getDescription()          { return description; }
+    public String getStatus()               { return status; }
+    public void   setStatus(String status)  { this.status = status; }
+    public String getResolution()           { return resolution; }
+    public void   setResolution(String r)   { this.resolution = r; }
+    public LocalDate getDate()              { return date; }
 
     @Override
     public String toString() {
-        return description + " [" + status + "] - " + date;
+        return "[" + status + "] " + description + (resolution != null ? " → " + resolution : "");
     }
 }
