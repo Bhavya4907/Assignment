@@ -1,6 +1,5 @@
 package assignment.model;
 
-import assignment.data.*;
 import assignment.model.*;
 import assignment.ui.*;
 import assignment.service.*;

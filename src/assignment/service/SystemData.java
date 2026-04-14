@@ -19,7 +19,6 @@ public class SystemData {
         courses.add(new Course("HS101", "IVS",   "Hameer",              3, 1, new ArrayList<>()));
     }
 
-
     public static Course getCourseByCode(String code) {
         if (code == null) return null;
         for (Course c : courses) {

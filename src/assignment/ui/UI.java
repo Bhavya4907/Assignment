@@ -34,7 +34,7 @@ public class UI {
 
             String pass = JOptionPane.showInputDialog("Enter Admin Password:");
 
-            if ("admin123".equals(pass)) {
+            if ("ridhi".equals(pass)) {
                 new AdminUI();
             } else {
                 JOptionPane.showMessageDialog(jframe, "Wrong Password!");
