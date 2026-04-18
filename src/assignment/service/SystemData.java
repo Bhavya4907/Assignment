@@ -1,6 +1,5 @@
 package assignment.service;
 
-import assignment.data.*;
 import assignment.model.*;
 import assignment.ui.*;
 import assignment.service.*;
@@ -28,4 +27,7 @@ public class SystemData {
         }
         return null;
     }
+
+    public static final FeedbackManager<Integer> ratingFeedback  = new FeedbackManager<>();
+    public static final FeedbackManager<String>  commentFeedback = new FeedbackManager<>();
 }

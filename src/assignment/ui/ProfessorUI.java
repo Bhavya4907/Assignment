@@ -14,7 +14,7 @@ public class ProfessorUI extends JFrame {
 
     private final Professor professor;
 
-    private JButton viewCourses, updateCourse, viewStudents, out;
+    private JButton viewCourses, updateCourse, viewStudents,feed, out;
 
     public ProfessorUI(Professor professor) {
         this.professor = professor;
@@ -23,16 +23,18 @@ public class ProfessorUI extends JFrame {
         new Upyogkarta().loadAllStudents();
 
         setTitle("Professor Panel – " + professor.name);
-        setLayout(new GridLayout(4, 1, 10, 10));
+        setLayout(new GridLayout(5, 1, 10, 10));
 
         viewCourses  = new JButton("View My Courses");
         updateCourse = new JButton("Update Course Details");
         viewStudents = new JButton("View Enrolled Students");
+        feed         = new JButton("Feedback");
         out          = new JButton("Logout");
 
         add(viewCourses);
         add(updateCourse);
         add(viewStudents);
+        add(feed);
         add(out);
 
         setSize(420, 320);
@@ -223,6 +225,41 @@ public class ProfessorUI extends JFrame {
                 return;
             }
             showTable("Students Enrolled in " + code.trim().toUpperCase(), model);
+        });
+
+        feed.addActionListener(e -> {
+
+            String code = JOptionPane.showInputDialog(this, "Enter course code to view feedback:");
+            if (code == null || code.trim().isEmpty()) return;
+
+            String courseCode = code.trim().toUpperCase();
+
+            List<Feedback<Integer>> ratings  = SystemData.ratingFeedback.getFeedbackByCourse(courseCode);
+            List<Feedback<String>>  comments = SystemData.commentFeedback.getFeedbackByCourse(courseCode);
+
+            if (ratings.isEmpty() && comments.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No feedback found for course: " + courseCode);
+                return;
+            }
+
+            String[] cols = {"Student", "Type", "Value", "Date"};
+            DefaultTableModel model = new DefaultTableModel(cols, 0);
+
+            for (Feedback<Integer> f : ratings) {
+                model.addRow(new Object[]{f.getStudentName(), "Rating ⭐", f.getValue() + " / 5", f.getDate()});
+            }
+            for (Feedback<String> f : comments) {
+                model.addRow(new Object[]{f.getStudentName(), "Comment 💬", f.getValue(), f.getDate()});
+            }
+
+            // Calculate average rating
+            if (!ratings.isEmpty()) {
+                double avg = ratings.stream().mapToInt(Feedback::getValue).average().orElse(0);
+                JOptionPane.showMessageDialog(this,
+                        String.format("Average rating for %s: %.1f / 5  (%d ratings)", courseCode, avg, ratings.size()));
+            }
+
+            showTable("Feedback for " + courseCode, model);
         });
 
         // ------------------------------------------------------------------ //

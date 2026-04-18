@@ -106,4 +106,52 @@ public class Upyogkarta {
             e.printStackTrace();
         }
     }
+
+    public TeachingAssistant validateTA(String id) {
+        try (Connection con = DBConnection.getConnection()) {
+
+            String query = "SELECT * FROM users WHERE id=? AND role='ta'";
+            PreparedStatement ps = con.prepareStatement(query);
+
+            ps.setInt(1, Integer.parseInt(id));
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String name   = rs.getString("name");
+                String branch = rs.getString("branch");
+
+                TeachingAssistant ta = new TeachingAssistant(name, id, branch);
+
+                ta.dbId  = rs.getInt("id");
+                ta.email = rs.getString("email");
+
+                return ta;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean registerTA(String name, String email, String password, String branch) {
+        try (Connection con = DBConnection.getConnection()) {
+
+            String query = "INSERT INTO users(name, email, password, role, branch) VALUES (?, ?, ?, 'ta', ?)";
+            PreparedStatement ps = con.prepareStatement(query);
+
+            ps.setString(1, name);
+            ps.setString(2, email);
+            ps.setString(3, password);
+            ps.setString(4, branch);
+
+            ps.executeUpdate();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

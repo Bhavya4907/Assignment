@@ -1,2 +1,0 @@
-student@gmail.com,1234,AI
-user2@gmail.com,pass2,CSE

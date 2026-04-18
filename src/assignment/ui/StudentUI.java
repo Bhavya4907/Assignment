@@ -1,6 +1,5 @@
 package assignment.ui;
 
-import assignment.data.*;
 import assignment.model.*;
 import assignment.service.*;
 
@@ -16,13 +15,13 @@ public class StudentUI extends JFrame {
 
     private final Student student;
 
-    private JButton view, reg, schedule, drop, complaint, progress, viewComplaints, out;
+    private JButton view, reg, schedule, drop, complaint, progress, viewComplaints, out ,feed;
 
     public StudentUI(Student student) {
         this.student = student;
 
         setTitle("Student Dashboard – " + student.name + " (Sem " + student.currentSemester + ")");
-        setLayout(new GridLayout(8, 1, 10, 10));
+        setLayout(new GridLayout(9, 1, 10, 10));
 
         view            = new JButton("View Available Courses");
         schedule        = new JButton("View My Schedule");
@@ -32,12 +31,14 @@ public class StudentUI extends JFrame {
         viewComplaints  = new JButton("View My Complaints");
         progress        = new JButton("Track Academic Progress");
         out             = new JButton("Logout");
+        feed            = new JButton("Feedback");
 
         add(view);
         add(schedule);
         add(reg);
         add(drop);
         add(complaint);
+        add(feed);
         add(viewComplaints);
         add(progress);
         add(out);
@@ -63,8 +64,7 @@ public class StudentUI extends JFrame {
                             : "TBA";
 
                     model.addRow(new Object[]{
-                            c.getCode(), c.getTitle(), c.getProfessor(),
-                            c.getCredit(), prereqs, timing
+                            c.getCode(), c.getTitle(), c.getProfessor(), c.getCredit(), prereqs, timing
                     });
                 }
             }
@@ -77,9 +77,6 @@ public class StudentUI extends JFrame {
             showTable("Available Courses – Semester " + student.currentSemester, model);
         });
 
-        // ------------------------------------------------------------------ //
-        // 2. REGISTER FOR A COURSE
-        // ------------------------------------------------------------------ //
         reg.addActionListener(e -> {
 
             StringBuilder sb = new StringBuilder();
@@ -272,7 +269,62 @@ public class StudentUI extends JFrame {
             showTable("My Complaints", model);
         });
 
+        feed.addActionListener(e -> {
+
+            // Only allow feedback on completed courses
+            if (student.completed.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "You have no completed courses to give feedback on.");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder("Completed courses:\n");
+            for (String code : student.completed) {
+                sb.append(" • ").append(code).append("\n");
+            }
+
+            String code = JOptionPane.showInputDialog(this,
+                    sb + "\nEnter course code to give feedback for:");
+            if (code == null || code.trim().isEmpty()) return;
+
+            if (!student.completed.contains(code.trim().toUpperCase())) {
+                JOptionPane.showMessageDialog(this, "You can only give feedback for completed courses.");
+                return;
+            }
+
+            // Numeric rating
+            String ratingStr = JOptionPane.showInputDialog(this,
+                    "Enter a numeric rating (1–5) for " + code.trim().toUpperCase() + ":");
+            if (ratingStr != null && !ratingStr.trim().isEmpty()) {
+                try {
+                    int rating = Integer.parseInt(ratingStr.trim());
+                    if (rating < 1 || rating > 5) throw new NumberFormatException();
+
+                    Feedback<Integer> rf = new Feedback<>(
+                            code.trim().toUpperCase(), student.name, rating, "RATING");
+                    SystemData.ratingFeedback.addFeedback(rf);
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Invalid rating. Must be a number between 1 and 5.");
+                    return;
+                }
+            }
+
+            // Textual comment
+            String comment = JOptionPane.showInputDialog(this,
+                    "Enter a text comment for " + code.trim().toUpperCase()
+                            + " (or leave blank to skip):");
+            if (comment != null && !comment.trim().isEmpty()) {
+                Feedback<String> cf = new Feedback<>(
+                        code.trim().toUpperCase(), student.name, comment.trim(), "COMMENT");
+                SystemData.commentFeedback.addFeedback(cf);
+            }
+
+            JOptionPane.showMessageDialog(this, "Thank you! Feedback submitted successfully.");
+        });
+
         out.addActionListener(e -> dispose());
+
+
     }
 
 

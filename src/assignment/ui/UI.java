@@ -1,5 +1,7 @@
 package assignment.ui;
 
+import assignment.service.Upyogkarta;
+
 import javax.swing.*;
 
 public class UI {
@@ -11,14 +13,17 @@ public class UI {
         JButton student = new JButton("Student");
         JButton admin = new JButton("Administrator");
         JButton professor = new JButton("Professor");
+        JButton ta = new JButton("Teaching Assistant");
 
         student.setBounds(100, 80, 150, 40);
         admin.setBounds(100, 140, 150, 40);
         professor.setBounds(100, 200, 150, 40);
+        ta.setBounds(100, 260, 150, 40);
 
         jframe.add(student);
         jframe.add(admin);
         jframe.add(professor);
+        jframe.add(ta);
 
         jframe.setSize(400, 400);
         jframe.setLayout(null);
@@ -28,6 +33,9 @@ public class UI {
         student.addActionListener(e -> {
             new LoginUI();
         });
+
+        Upyogkarta u = new Upyogkarta();
+        u.registerTA("TA User", "ta1@gmail.com", "1234", "CSE");
 
 
         admin.addActionListener(e -> {
@@ -43,6 +51,10 @@ public class UI {
 
         professor.addActionListener(e -> {
             new ProfessorLoginUI();
+        });
+
+        ta.addActionListener(e -> {
+            new TALoginUI();
         });
     }
 }
